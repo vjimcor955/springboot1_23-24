@@ -1,5 +1,6 @@
 package com.example.demo.controlador;
 
+import com.example.demo.dto.UsuarioDTO;
 import com.example.demo.modelo.Usuario;
 import com.example.demo.repos.UsuarioRepositorio;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
@@ -8,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
@@ -21,8 +23,13 @@ public class UsuarioControlador {
     }
 
     @GetMapping("/")
-    public List<Usuario> getUsuarios() {
-        return usuarioRepositorio.findAll();
+    public List<UsuarioDTO> getUsuarios() {
+        List<UsuarioDTO> resultado = new ArrayList<>();
+        for(Usuario usuario : usuarioRepositorio.findAll()) resultado.add(new UsuarioDTO(usuario));
+        return resultado;
+
+
+//        return usuarioRepositorio.findAll();
     }
 
     // Add methods for POST, PUT, DELETE...

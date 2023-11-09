@@ -1,13 +1,16 @@
 package com.example.demo.controlador;
 
+import com.example.demo.dto.ProductoDTO;
 import com.example.demo.repos.ProductoRepositorio;
 import com.example.demo.repos.UsuarioRepositorio;
 import org.springframework.data.rest.webmvc.ResourceNotFoundException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.demo.modelo.Producto;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 @CrossOrigin(origins = "http://localhost:63342")
 @RestController
@@ -22,9 +25,17 @@ public class ProductoControlador {
     }
 
     @GetMapping("/")
-    List<Producto> getProductos()
-    {
-        return productoRepositorio.findAll();
+    public ResponseEntity<List<ProductoDTO>> getProductos() {
+        List<ProductoDTO> resultado = new ArrayList<>();
+        for (Producto producto : productoRepositorio.findAll()) {
+            resultado.add(new ProductoDTO(producto));
+        }
+        return new ResponseEntity<>(resultado, HttpStatus.OK);
+    }
+    ResponseEntity<String> customHeader() {
+        return ResponseEntity.ok()
+                .header("Custom-Header", "foo")
+                .body("Custom header set");
     }
 
     @GetMapping("/{id}")
@@ -33,8 +44,13 @@ public class ProductoControlador {
         return productoRepositorio.findById(id).orElse(null);
     }
     @PostMapping("/")
-    public Producto createProducto(@Valid @RequestBody Producto producto) {
-        return productoRepositorio.save(producto);
+    public ResponseEntity<?> crearProducto(@Valid @RequestBody Producto producto) {
+        try {
+            productoRepositorio.save(producto);
+            return ResponseEntity.status(HttpStatus.CREATED).body("Producto creado exitosamente");
+        } catch (Exception ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: Producto ya existente");
+        }
     }
 
     @PutMapping("/{id}")
