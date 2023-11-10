@@ -8,10 +8,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.example.demo.modelo.Producto;
-
 import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
+
 @CrossOrigin(origins = "http://localhost:63342")
 @RestController
 @RequestMapping("/api/producto")
@@ -30,7 +31,7 @@ public class ProductoControlador {
         for (Producto producto : productoRepositorio.findAll()) {
             resultado.add(new ProductoDTO(producto));
         }
-        return new ResponseEntity<>(resultado, HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK).body(resultado);
     }
     ResponseEntity<String> customHeader() {
         return ResponseEntity.ok()
@@ -39,9 +40,8 @@ public class ProductoControlador {
     }
 
     @GetMapping("/{id}")
-    Producto getProductoById(@PathVariable Long id)
-    {
-        return productoRepositorio.findById(id).orElse(null);
+    ResponseEntity<Optional<Producto>> getProductoById(@PathVariable Long id) {
+        return ResponseEntity.status(HttpStatus.OK).body(productoRepositorio.findById(id));
     }
     @PostMapping("/")
     public ResponseEntity<?> crearProducto(@Valid @RequestBody Producto producto) {
@@ -56,33 +56,33 @@ public class ProductoControlador {
     @PutMapping("/{id}")
     public Producto updateProducto(@PathVariable Long id, @Valid @RequestBody Producto producto) {
         return productoRepositorio.findById(id)
-                .map(existingProducto -> {
-                    existingProducto.setName(producto.getName());
-                    existingProducto.setPrice(producto.getPrice());
-                    return productoRepositorio.save(existingProducto);
-                })
-                .orElseThrow(() -> new ResourceNotFoundException("Producto not found with id " + id));
+            .map(existingProducto -> {
+                existingProducto.setName(producto.getName());
+                existingProducto.setPrice(producto.getPrice());
+                return ResponseEntity.status(HttpStatus.OK).body(productoRepositorio.save(existingProducto));
+            })
+            .orElseThrow(() -> new ResourceNotFoundException("Producto not found with id " + id)).getBody();
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteProducto(@PathVariable Long id) {
         return productoRepositorio.findById(id)
-                .map(producto -> {
-                    productoRepositorio.delete(producto);
-                    return ResponseEntity.ok().build();
-                })
-                .orElseThrow(() -> new ResourceNotFoundException("Producto not found with id " + id));
+            .map(producto -> {
+                productoRepositorio.delete(producto);
+                return ResponseEntity.ok().build();
+            })
+            .orElseThrow(() -> new ResourceNotFoundException("Producto not found with id " + id));
     }
 
     // Crear productos asociados a cliente
     @PostMapping("/{id}/productos")
     public Producto addProducto(@PathVariable Long id, @Valid @RequestBody Producto producto) {
         return productoRepositorio.findById(id)
-                .map(usuario -> {
-                    producto.setUsuario(usuario.getUsuario());
-                    return productoRepositorio.save(producto);
-                })
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario not found with id " + id));
+            .map(usuario -> {
+                producto.setUsuario(usuario.getUsuario());
+                return ResponseEntity.status(HttpStatus.OK).body(productoRepositorio.save(producto));
+            })
+            .orElseThrow(() -> new ResourceNotFoundException("Usuario not found with id " + id)).getBody();
     }
 
     @PutMapping("/{id}/productos/{productoId}")
@@ -92,12 +92,12 @@ public class ProductoControlador {
         }
 
         return productoRepositorio.findById(productoId)
-                .map(producto -> {
-                    producto.setName(productoRequest.getName());
-                    producto.setPrice(productoRequest.getPrice());
-                    return productoRepositorio.save(producto);
-                })
-                .orElseThrow(() -> new ResourceNotFoundException("Producto not found with id " + productoId));
+            .map(producto -> {
+                producto.setName(productoRequest.getName());
+                producto.setPrice(productoRequest.getPrice());
+                return ResponseEntity.status(HttpStatus.OK).body(productoRepositorio.save(producto));
+            })
+            .orElseThrow(() -> new ResourceNotFoundException("Producto not found with id " + productoId)).getBody();
     }
     @GetMapping("/usuario/{usuarioId}")
     public List<Producto> getProductosByUsuario(@PathVariable Long usuarioId) {

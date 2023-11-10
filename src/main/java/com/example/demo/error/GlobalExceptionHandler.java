@@ -13,10 +13,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
     public ResponseEntity<Object> handleProductoNotFound(Exception ex) {
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Producto no encontrado");
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage() + ": Producto no encontrado");
     }
 
     public ResponseEntity<Object> handleProductoExistente(Exception ex) {
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error: Producto ya existente");
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ex.getMessage() + ": Producto ya existente");
     }
 }
